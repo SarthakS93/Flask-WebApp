@@ -87,7 +87,7 @@ h3 {
 }
 
 
-/* Contact form */
+/* form */
 form label {
   font-size: 1.2em;
   font-weight: bold;
@@ -97,7 +97,9 @@ form label {
  
 form input#name,
 form input#email,
-form input#subject {
+form input#subject,
+form input#username,
+form input#password {
   width: 400px;
   background-color: #fafafa;
   -webkit-border-radius: 3px;
