@@ -1,6 +1,6 @@
 from app import app
 from flask import Flask, render_template, request, flash, session, url_for, redirect
-from .forms import ContactForm, SignupForm
+from .forms import ContactForm, SignupForm, SignInForm
 from flask.ext.mail import Message, Mail
 from .models import db, User
 
@@ -42,6 +42,8 @@ def testdb():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+	if 'username' in session:
+		return redirect(url_for('profile'))  
 	
 	if request.method == 'POST':
 		form = SignupForm(request.form)
@@ -51,7 +53,7 @@ def signup():
 			newuser = User(form.username.data, form.name.data, form.email.data, form.password.data)
 			db.session.add(newuser)
 			db.session.commit()
-			session['email'] = newuser.email
+			session['username'] = newuser.username
 			return redirect(url_for('profile'))
 	elif request.method == 'GET':
 		form = SignupForm()
@@ -59,11 +61,38 @@ def signup():
 
 @app.route('/profile')
 def profile():
-	if 'email' not in session:
+	if 'username' not in session:
 		return redirect(url_for('signin'))
 	user = User.query.filter_by(email = session['email']).first()
 	if user is None:
 		return redirect(url_for('signin'))
 	else:
 		return render_template('profile.html')
+
+
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+	if 'username' in session:
+		return redirect(url_for('profile'))
+	
+	if request.method == 'POST':
+		form = SignInForm(request.form)
+		if not form.validate():
+			return render_template('signin.html', form = form)
+		else:
+			session['username'] = form.username.data
+			return redirect(url_for('profile'))
+	elif request.method == 'GET':
+		form = SignInForm()
+		return render_template('signin.html', form = form)
+
+
+@app.route('/signout')
+def signout():
+ 
+  if 'username' not in session:
+    return redirect(url_for('signin'))
+     
+  session.pop('username', None)
+  return redirect(url_for('home'))
   
