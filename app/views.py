@@ -1,8 +1,8 @@
 from app import app
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, session, url_for, redirect
 from .forms import ContactForm, SignupForm
 from flask.ext.mail import Message, Mail
-from .models import db
+from .models import db, User
 
 mail = Mail(app)
 
@@ -48,7 +48,22 @@ def signup():
 		if not form.validate():
 			return render_template('signup.html', form = form)
 		else:
-			return 'ok'
+			newuser = User(form.username.data, form.name.data, form.email.data, form.password.data)
+			db.session.add(newuser)
+			db.session.commit()
+			session['email'] = newuser.email
+			return redirect(url_for('profile'))
 	elif request.method == 'GET':
 		form = SignupForm()
 		return render_template('signup.html', form = form)
+
+@app.route('/profile')
+def profile():
+	if 'email' not in session:
+		return redirect(url_for('signin'))
+	user = User.query.filter_by(email = session['email']).first()
+	if user is None:
+		return redirect(url_for('signin'))
+	else:
+		return render_template('profile.html')
+  
