@@ -23,7 +23,7 @@ def contact():
 		if not form.validate():
 			return render_template('contact.html', form = form)
 		else:
-			msg = Message(form.subject.data, sender = app.config['MAIL_USERNAME'], recipients=[form.email.data,])
+			msg = Message(form.subject.data, sender = app.config['MAIL_USERNAME'], recipients=['sarthakfloyd@gmail.com',])
 			msg.body = form.message.data
 			mail.send(msg)
 			return render_template('contact.html', success = True)
